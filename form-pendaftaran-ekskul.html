@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Form Pendaftaran Ekskul - SMK Letris Pamulang</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    background: #fdf6ec;
+    margin: 0;
+    padding: 20px;
+    color: #3a2e26;
+  }
+  .container {
+    max-width: 650px;
+    margin: 0 auto;
+    background: #ffffff;
+    border-radius: 14px;
+    padding: 30px 25px;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.08);
+  }
+  h1 {
+    text-align: center;
+    color: #c2410c;
+    margin: 0 0 4px;
+    font-size: 24px;
+  }
+  h2.sub {
+    text-align: center;
+    color: #c2410c;
+    margin: 0 0 25px;
+    font-size: 20px;
+    font-weight: 600;
+  }
+  label {
+    display: block;
+    font-weight: 600;
+    margin: 16px 0 6px;
+  }
+  input[type="text"], select {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #d9c7b6;
+    border-radius: 8px;
+    font-size: 15px;
+    background: #fffaf5;
+  }
+  .radio-group label {
+    display: inline-block;
+    font-weight: normal;
+    margin: 0 15px 0 0;
+  }
+  .radio-group {
+    margin-top: 4px;
+  }
+  button#submitBtn {
+    margin-top: 22px;
+    background: #16a34a;
+    color: #fff;
+    border: none;
+    padding: 11px 22px;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  button#submitBtn:hover { background: #15803d; }
+
+  h3 {
+    margin-top: 35px;
+    color: #3a2e26;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+    font-size: 14px;
+  }
+  thead tr {
+    background: #c2410c;
+    color: #fff;
+  }
+  th, td {
+    padding: 10px 8px;
+    text-align: left;
+  }
+  tbody tr:nth-child(even) { background: #fdf1e7; }
+  tbody tr { border-bottom: 1px solid #eee; }
+
+  .btn-edit, .btn-delete {
+    border: none;
+    color: #fff;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 13px;
+    cursor: pointer;
+    margin-right: 5px;
+  }
+  .btn-edit { background: #eab308; }
+  .btn-edit:hover { background: #ca8a04; }
+  .btn-delete { background: #dc2626; }
+  .btn-delete:hover { background: #b91c1c; }
+
+  .empty-msg {
+    text-align: center;
+    color: #999;
+    padding: 15px 0;
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <h1>Form Pendaftaran Ekskul</h1>
+  <h2 class="sub">SMK Letris Pamulang</h2>
+
+  <label for="nama">Nama Lengkap:</label>
+  <input type="text" id="nama" placeholder="Masukkan nama siswa">
+
+  <label>Kelas:</label>
+  <div class="radio-group">
+    <label><input type="radio" name="kelas" value="X"> X</label>
+    <label><input type="radio" name="kelas" value="XI"> XI</label>
+    <label><input type="radio" name="kelas" value="XII"> XII</label>
+  </div>
+
+  <label for="jurusan">Jurusan:</label>
+  <select id="jurusan">
+    <option value="">-- Pilih Jurusan --</option>
+    <option value="PPLG">PPLG</option>
+    <option value="DKV">DKV</option>
+    <option value="TJKT">TJKT</option>
+    <option value="AKL">AKL</option>
+    <option value="BDP">BDP</option>
+    <option value="MPLB">MPLB</option>
+  </select>
+
+  <label for="ekskul">Pilihan Ekskul:</label>
+  <select id="ekskul">
+    <option value="">-- Pilih Ekstrakurikuler --</option>
+    <option value="Animasi">Animasi</option>
+    <option value="Paskibra">Paskibra</option>
+    <option value="Volly">Volly</option>
+    <option value="Basket">Basket</option>
+    <option value="Futsal">Futsal</option>
+    <option value="Letsin">Letsin</option>
+    <option value="PMR">PMR</option>
+    <option value="Dance Modern">Dance Modern</option>
+  </select>
+
+  <button id="submitBtn" onclick="simpanData()">Tambah Data</button>
+
+  <h3>Data Pendaftaran Siswa</h3>
+  <table>
+    <thead>
+      <tr>
+        <th>No</th>
+        <th>Nama</th>
+        <th>Kelas</th>
+        <th>Jurusan</th>
+        <th>Ekskul</th>
+        <th>Aksi</th>
+      </tr>
+    </thead>
+    <tbody id="tabelBody"></tbody>
+  </table>
+  <div id="emptyMsg" class="empty-msg">Belum ada data.</div>
+</div>
+
+<script>
+  let dataSiswa = [];
+  let editIndex = -1; // -1 berarti mode tambah baru
+
+  function simpanData() {
+    const nama = document.getElementById('nama').value.trim();
+    const kelasRadio = document.querySelector('input[name="kelas"]:checked');
+    const jurusan = document.getElementById('jurusan').value;
+    const ekskul = document.getElementById('ekskul').value;
+
+    if (!nama || !kelasRadio || !jurusan || !ekskul) {
+      alert('Mohon lengkapi semua data terlebih dahulu!');
+      return;
+    }
+
+    const kelas = kelasRadio.value;
+    const item = { nama, kelas, jurusan, ekskul };
+
+    if (editIndex === -1) {
+      dataSiswa.push(item);
+      alert('Data berhasil ditambahkan');
+    } else {
+      dataSiswa[editIndex] = item;
+      alert('Data berhasil di edit');
+      editIndex = -1;
+      document.getElementById('submitBtn').textContent = 'Tambah Data';
+    }
+
+    resetForm();
+    renderTabel();
+  }
+
+  function resetForm() {
+    document.getElementById('nama').value = '';
+    document.querySelectorAll('input[name="kelas"]').forEach(r => r.checked = false);
+    document.getElementById('jurusan').value = '';
+    document.getElementById('ekskul').value = '';
+  }
+
+  function renderTabel() {
+    const tbody = document.getElementById('tabelBody');
+    const emptyMsg = document.getElementById('emptyMsg');
+    tbody.innerHTML = '';
+
+    if (dataSiswa.length === 0) {
+      emptyMsg.style.display = 'block';
+      return;
+    }
+    emptyMsg.style.display = 'none';
+
+    dataSiswa.forEach((item, index) => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${index + 1}</td>
+        <td>${item.nama}</td>
+        <td>${item.kelas}</td>
+        <td>${item.jurusan}</td>
+        <td>${item.ekskul}</td>
+        <td>
+          <button class="btn-edit" onclick="editData(${index})">Edit</button>
+          <button class="btn-delete" onclick="hapusData(${index})">Delete</button>
+        </td>
+      `;
+      tbody.appendChild(tr);
+    });
+  }
+
+  function editData(index) {
+    const item = dataSiswa[index];
+    document.getElementById('nama').value = item.nama;
+    document.querySelector(`input[name="kelas"][value="${item.kelas}"]`).checked = true;
+    document.getElementById('jurusan').value = item.jurusan;
+    document.getElementById('ekskul').value = item.ekskul;
+
+    editIndex = index;
+    document.getElementById('submitBtn').textContent = 'Simpan Perubahan';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function hapusData(index) {
+    dataSiswa.splice(index, 1);
+    alert('Data berhasil di hapus');
+    renderTabel();
+  }
+
+  renderTabel();
+</script>
+
+</body>
+</html>
